@@ -1,0 +1,60 @@
+#Importing data from statistics Finland to python
+
+
+#import libraries
+
+import pandas as pd
+import requests as rq
+import json
+
+#source API
+
+sourceData ='https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2021/paavo_pxt_12f3.px'
+incomeData = rq.get(sourceData)
+
+#check connection
+incomeData
+
+
+incomeDataJson = incomeData.json()
+
+#Check the keys 
+
+incomeDataJson.keys()
+
+#Check 'variables' type
+
+type(incomeDataJson['variables'][0])
+
+#Check information available at different levels for list information
+
+for response in incomeDataJson['variables']:
+    for items in response.items():
+        print(items[0])
+
+for response in incomeDataJson['variables']:  
+        for items in response.items(): 
+            print(items[1])
+
+
+# Put data into a dataframe
+
+data=[]
+for response in incomeDataJson['variables']:  
+    data.append({
+        "code" : response.get('code'),
+        "text": response.get('text'),
+        "values": response.get('values'),
+        
+    })
+
+postCodeData = pd.DataFrame(data)
+
+#check what the dataframe looks like
+postCodeData
+
+
+#Export to CSV
+postCodeData.to_csv('exportPostCode.csv')
+
+
