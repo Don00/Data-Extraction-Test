@@ -1,60 +1,65 @@
 #Importing data from statistics Finland to python
+# based on the this code https://github.com/janbrus/ssb-api-python-examples/blob/master/jsonstatToPandas_function-en.ipynb
 
 
-#import libraries
-
-import pandas as pd
-import requests as rq
 import json
+import pandas as pd
+import requests
+# pyjstat is the package to read JSON-stat, 'pip install pyjstat' 
+from pyjstat import pyjstat
 
-#source API
-
-sourceData ='https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2021/paavo_pxt_12f3.px'
-incomeData = rq.get(sourceData)
-
-#check connection
-incomeData
-
-
-incomeDataJson = incomeData.json()
-
-#Check the keys 
-
-incomeDataJson.keys()
-
-#Check 'variables' type
-
-type(incomeDataJson['variables'][0])
-
-#Check information available at different levels for list information
-
-for response in incomeDataJson['variables']:
-    for items in response.items():
-        print(items[0])
-
-for response in incomeDataJson['variables']:  
-        for items in response.items(): 
-            print(items[1])
+# Paste PostUrl where you you want the query posted
+postUrl2019 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2021/paavo_pxt_12f3.px'
+postUrl2017 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2020/paavo_pxt_12f3.px'
+postUrl2016 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2019/paavo_5_tr_2019.px'
+postUrl2015 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2018/paavo_5_tr_2018.px'
+postUrl2014 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2017/paavo_5_tr_2017.px'
+postUrl2013 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2016/paavo_5_tr_2016.px'
 
 
-# Put data into a dataframe
 
-data=[]
-for response in incomeDataJson['variables']:  
-    data.append({
-        "code" : response.get('code'),
-        "text": response.get('text'),
-        "values": response.get('values'),
-        
-    })
+apiQuery = {
 
-postCodeData = pd.DataFrame(data)
-
-#check what the dataframe looks like
-postCodeData
+      "query": [
+      ],
+      "response": {
+        "format": "json-stat2"
+      }
+    }
 
 
-#Export to CSV
-postCodeData.to_csv('exportPostCode.csv')
+
+# Function to convert the extraction into 2 dataframes, takes 2 parameters
+
+def apiToDataframe(postUrl2019, query):
+
+	# postUrl PostUrl where you you want the query posted
+
+
+	res = requests.post(postUrl2019, json=query)
+	# put the result in variable ds. Here you also have some metadata
+	ds = pyjstat.Dataset.read(res.text)
+	# write resultatet to 2 dataframes
+    # first dataframe with text
+	df = ds.write('dataframe')
+    # next dataframe with codes
+	df_id = ds.write('dataframe', naming='id')
+    # returner also ds if one need metadata
+	return df, df_id, ds
+
+
+
+df, df_id, ds = apiToDataframe(postUrl2019, apiQuery)
+
+
+df
+
+df_id
+
+
+ds
+
+df.to_csv('exportPostCode20192017.csv')
+
 
 
