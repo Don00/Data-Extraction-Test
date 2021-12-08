@@ -5,10 +5,10 @@
 import json
 import pandas as pd
 import requests
-# pyjstat is the package to read JSON-stat, 'pip install pyjstat' 
 from pyjstat import pyjstat
+import sqlite3
 
-# Paste PostUrl where you you want the query posted
+# URL where data is extracted from 
 postUrl2019 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2021/paavo_pxt_12f3.px'
 postUrl2017 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2020/paavo_pxt_12f3.px'
 postUrl2016 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2019/paavo_5_tr_2019.px'
@@ -17,7 +17,7 @@ postUrl2014 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittaine
 postUrl2013 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2016/paavo_5_tr_2016.px'
 
 
-
+# Query used to return data from URL 
 apiQuery = {
 
       "query": [
@@ -47,19 +47,41 @@ def apiToDataframe(postUrl2019, query):
     # returner also ds if one need metadata
 	return df, df_id, ds
 
-
-
 df, df_id, ds = apiToDataframe(postUrl2019, apiQuery)
-
 
 df
 
 df_id
 
-
 ds
 
-df.to_csv('exportPostCode20192017.csv')
+
+#Amend extracted data to only include currently needed information for tables
+averageIncomeOnly = df[df['Information'].str.contains("Average")]
+toDatabase = averageIncomeOnly[["Postal code area", "value"]]
+
+#loading data into sqlite database
+try:
+    
+    
+    sqliteConnection = sqlite3.connect('test_database.db')
+    con = sqliteConnection.cursor()
+    print("Database created and Successfully Connected to SQLite")
+
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome (post_code_area  VARCHAR(255), value INT);'''
+    con.execute(table_create)
+    sqliteConnection.commit()
+    print("SQLite table created")
+
+    toDatabase.to_sql('averageIncome', sqliteConnection, if_exists='replace', index=False)
+
+
+except sqlite3.Error as error:
+    print("Error while connecting to sqlite", error)
+finally:
+    if sqliteConnection:
+        sqliteConnection.close()
+        print("The SQLite connection is closed")
 
 
 
