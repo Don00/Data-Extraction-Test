@@ -1,5 +1,8 @@
 import sqlite3
 import pandas as pd
+import numpy as np
+
+
 
 
     
@@ -16,5 +19,11 @@ df.reset_index(drop=True, inplace=True)
 #df = pd.DataFrame(result)
 
 
-test= df[df['post_code'].isin({100, 2380, 16710, 41930, 54800})]
-print(test.to_string(index=False))
+fivePostCodes= df[df['post_code'].isin({100, 2380, 16710, 41930, 54800})]
+#print(fivePostCodes.to_string(index=False))
+
+fivePostCodes = fivePostCodes.set_index('post_code')
+fivePostCodes['increase'] = fivePostCodes['value_2019'] - fivePostCodes['value_2014']
+fivePostCodes['% change'] = fivePostCodes['increase'] / fivePostCodes['value_2014'] *100
+
+fivePostCodes
