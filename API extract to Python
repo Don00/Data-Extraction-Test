@@ -2,19 +2,85 @@
 # based on the this code https://github.com/janbrus/ssb-api-python-examples/blob/master/jsonstatToPandas_function-en.ipynb
 
 
-import json
-import pandas as pd
-import requests
-from pyjstat import pyjstat
-import sqlite3
-
-# URL where data is extracted from 
+#Link to statistics Finland table
 postUrl2019 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2021/paavo_pxt_12f3.px'
+
+
+# Query used to return data from URL 
+apiQuery = {
+
+      "query": [
+      ],
+      "response": {
+        "format": "json-stat2"
+      }
+    }
+
+
+
+# Function to convert the extraction into 2 dataframes, takes 2 parameters
+#Second dataframe, df_id, not removed to allow inclusion of urther data later
+
+def apiToDataframe(postUrl2019, query):
+
+	# postUrl PostUrl where you you want the query posted
+
+	res = requests.post(postUrl2019, json=query)
+
+    # put the result in variable ds. Here you also have some metadata
+	ds = pyjstat.Dataset.read(res.text)   
+             
+	# write resultatet to 2 dataframes
+    # first dataframe with text
+	df = ds.write('dataframe')
+    # next dataframe with codes
+	df_id = ds.write('dataframe', naming='id')
+    # returner also ds if one need metadata
+	return df, df_id, ds
+
+  
+
+df, df_id, ds = apiToDataframe(postUrl2019, apiQuery)
+
+df
+
+df_id
+
+
+ds
+
+#Amend extracted data to only include currently needed information for tables
+averageIncomeOnly = df[df['Information'].str.contains("Average")]
+toDatabase = averageIncomeOnly[["Postal code area", "value"]]
+
+#loading data into sqlite database
+try:
+    
+    
+    sqliteConnection = sqlite3.connect('statisticsFinland.db')
+    con = sqliteConnection.cursor()
+    print("Database created and Successfully Connected to SQLite")
+
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2019 (post_code_area  VARCHAR(255), value INT);'''
+    con.execute(table_create)
+    sqliteConnection.commit()
+    print("SQLite table created")
+
+    toDatabase.to_sql('averageIncome2019', sqliteConnection, if_exists='append', index=False)
+
+
+except sqlite3.Error as error:
+    print("Error while connecting to sqlite", error)
+finally:
+    if sqliteConnection:
+        sqliteConnection.close()
+        print("The SQLite connection is closed")
+        
+    
+
+###############################################################################################################
+
 postUrl2017 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2020/paavo_pxt_12f3.px'
-postUrl2016 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2019/paavo_5_tr_2019.px'
-postUrl2015 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2018/paavo_5_tr_2018.px'
-postUrl2014 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2017/paavo_5_tr_2017.px'
-postUrl2013 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2016/paavo_5_tr_2016.px'
 
 
 # Query used to return data from URL 
@@ -31,14 +97,15 @@ apiQuery = {
 
 # Function to convert the extraction into 2 dataframes, takes 2 parameters
 
-def apiToDataframe(postUrl2019, query):
+def apiToDataframe(postUrl2017, query):
 
 	# postUrl PostUrl where you you want the query posted
 
+	res = requests.post(postUrl2017, json=query)
 
-	res = requests.post(postUrl2019, json=query)
-	# put the result in variable ds. Here you also have some metadata
-	ds = pyjstat.Dataset.read(res.text)
+    # put the result in variable ds. Here you also have some metadata
+	ds = pyjstat.Dataset.read(res.text)   
+             
 	# write resultatet to 2 dataframes
     # first dataframe with text
 	df = ds.write('dataframe')
@@ -47,14 +114,16 @@ def apiToDataframe(postUrl2019, query):
     # returner also ds if one need metadata
 	return df, df_id, ds
 
-df, df_id, ds = apiToDataframe(postUrl2019, apiQuery)
+  
+
+df, df_id, ds = apiToDataframe(postUrl2017, apiQuery)
 
 df
 
 df_id
 
-ds
 
+ds
 
 #Amend extracted data to only include currently needed information for tables
 averageIncomeOnly = df[df['Information'].str.contains("Average")]
@@ -64,16 +133,16 @@ toDatabase = averageIncomeOnly[["Postal code area", "value"]]
 try:
     
     
-    sqliteConnection = sqlite3.connect('test_database.db')
+    sqliteConnection = sqlite3.connect('statisticsFinland.db')
     con = sqliteConnection.cursor()
     print("Database created and Successfully Connected to SQLite")
 
-    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome (post_code_area  VARCHAR(255), value INT);'''
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2017 (post_code_area  VARCHAR(255), value INT);'''
     con.execute(table_create)
     sqliteConnection.commit()
     print("SQLite table created")
 
-    toDatabase.to_sql('averageIncome', sqliteConnection, if_exists='replace', index=False)
+    toDatabase.to_sql('averageIncome2017', sqliteConnection, if_exists='append', index=False)
 
 
 except sqlite3.Error as error:
@@ -83,5 +152,317 @@ finally:
         sqliteConnection.close()
         print("The SQLite connection is closed")
 
+#############################################################################################################################################
 
 
+
+
+
+
+
+
+postUrl2016 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2019/paavo_5_tr_2019.px'
+
+
+# Query used to return data from URL 
+apiQuery = {
+
+      "query": [
+      ],
+      "response": {
+        "format": "json-stat2"
+      }
+    }
+
+
+
+# Function to convert the extraction into 2 dataframes, takes 2 parameters
+
+def apiToDataframe(postUrl2016, query):
+
+	# postUrl PostUrl where you you want the query posted
+
+	res = requests.post(postUrl2016, json=query)
+
+    # put the result in variable ds. Here you also have some metadata
+	ds = pyjstat.Dataset.read(res.text)   
+             
+	# write resultatet to 2 dataframes
+    # first dataframe with text
+	df = ds.write('dataframe')
+    # next dataframe with codes
+	df_id = ds.write('dataframe', naming='id')
+    # returner also ds if one need metadata
+	return df, df_id, ds
+
+  
+
+df, df_id, ds = apiToDataframe(postUrl2016, apiQuery)
+
+df
+
+df_id
+
+
+ds
+
+#Amend extracted data to only include currently needed information for tables
+averageIncomeOnly = df[df['Data'].str.contains("Average")]
+toDatabase = averageIncomeOnly[["Postal code area", "value"]]
+
+#loading data into sqlite database
+try:
+    
+    
+    sqliteConnection = sqlite3.connect('statisticsFinland.db')
+    con = sqliteConnection.cursor()
+    print("Database created and Successfully Connected to SQLite")
+
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2016 (post_code_area  VARCHAR(255), value INT);'''
+    con.execute(table_create)
+    sqliteConnection.commit()
+    print("SQLite table created")
+
+    toDatabase.to_sql('averageIncome2016', sqliteConnection, if_exists='append', index=False)
+
+
+except sqlite3.Error as error:
+    print("Error while connecting to sqlite", error)
+finally:
+    if sqliteConnection:
+        sqliteConnection.close()
+        print("The SQLite connection is closed")
+
+#############################################################################################################################################
+
+
+
+
+postUrl2015 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2018/paavo_5_tr_2018.px'
+
+
+# Query used to return data from URL 
+apiQuery = {
+
+      "query": [
+      ],
+      "response": {
+        "format": "json-stat2"
+      }
+    }
+
+
+
+# Function to convert the extraction into 2 dataframes, takes 2 parameters
+
+def apiToDataframe(postUrl2015, query):
+
+	# postUrl PostUrl where you you want the query posted
+
+	res = requests.post(postUrl2015, json=query)
+
+    # put the result in variable ds. Here you also have some metadata
+	ds = pyjstat.Dataset.read(res.text)   
+             
+	# write resultatet to 2 dataframes
+    # first dataframe with text
+	df = ds.write('dataframe')
+    # next dataframe with codes
+	df_id = ds.write('dataframe', naming='id')
+    # returner also ds if one need metadata
+	return df, df_id, ds
+
+  
+
+df, df_id, ds = apiToDataframe(postUrl2015, apiQuery)
+
+df
+
+df_id
+
+
+ds
+
+#Amend extracted data to only include currently needed information for tables
+averageIncomeOnly = df[df['Data'].str.contains("Average")]
+toDatabase = averageIncomeOnly[["Postal code area", "value"]]
+
+#loading data into sqlite database
+try:
+    
+    
+    sqliteConnection = sqlite3.connect('statisticsFinland.db')
+    con = sqliteConnection.cursor()
+    print("Database created and Successfully Connected to SQLite")
+
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2015 (post_code_area  VARCHAR(255), value INT);'''
+    con.execute(table_create)
+    sqliteConnection.commit()
+    print("SQLite table created")
+
+    toDatabase.to_sql('averageIncome2015', sqliteConnection, if_exists='append', index=False)
+
+
+except sqlite3.Error as error:
+    print("Error while connecting to sqlite", error)
+finally:
+    if sqliteConnection:
+        sqliteConnection.close()
+        print("The SQLite connection is closed")
+
+#############################################################################################################################################
+
+
+
+
+postUrl2014 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2017/paavo_5_tr_2017.px'
+
+
+
+# Query used to return data from URL 
+apiQuery = {
+
+      "query": [
+      ],
+      "response": {
+        "format": "json-stat2"
+      }
+    }
+
+
+
+# Function to convert the extraction into 2 dataframes, takes 2 parameters
+
+def apiToDataframe(postUrl2014, query):
+
+	# postUrl PostUrl where you you want the query posted
+
+	res = requests.post(postUrl2014, json=query)
+
+    # put the result in variable ds. Here you also have some metadata
+	ds = pyjstat.Dataset.read(res.text)   
+             
+	# write resultatet to 2 dataframes
+    # first dataframe with text
+	df = ds.write('dataframe')
+    # next dataframe with codes
+	df_id = ds.write('dataframe', naming='id')
+    # returner also ds if one need metadata
+	return df, df_id, ds
+
+  
+
+df, df_id, ds = apiToDataframe(postUrl2014, apiQuery)
+
+df
+
+df_id
+
+
+ds
+
+#Amend extracted data to only include currently needed information for tables
+averageIncomeOnly = df[df['Data'].str.contains("Average")]
+toDatabase = averageIncomeOnly[["Postal code area", "value"]]
+
+#loading data into sqlite database
+try:
+    
+    
+    sqliteConnection = sqlite3.connect('statisticsFinland.db')
+    con = sqliteConnection.cursor()
+    print("Database created and Successfully Connected to SQLite")
+
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2014 (post_code_area  VARCHAR(255), value INT);'''
+    con.execute(table_create)
+    sqliteConnection.commit()
+    print("SQLite table created")
+
+    toDatabase.to_sql('averageIncome2014', sqliteConnection, if_exists='append', index=False)
+
+
+except sqlite3.Error as error:
+    print("Error while connecting to sqlite", error)
+finally:
+    if sqliteConnection:
+        sqliteConnection.close()
+        print("The SQLite connection is closed")
+
+#############################################################################################################################################
+
+
+
+
+
+postUrl2013 = 'https://pxnet2.stat.fi:443/PXWeb/api/v1/en/Postinumeroalueittainen_avoin_tieto/2016/paavo_5_tr_2016.px'
+
+
+
+# Query used to return data from URL 
+apiQuery = {
+
+      "query": [
+      ],
+      "response": {
+        "format": "json-stat2"
+      }
+    }
+
+
+
+# Function to convert the extraction into 2 dataframes, takes 2 parameters
+
+def apiToDataframe(postUrl2013, query):
+
+	# postUrl PostUrl where you you want the query posted
+
+	res = requests.post(postUrl2013, json=query)
+
+    # put the result in variable ds. Here you also have some metadata
+	ds = pyjstat.Dataset.read(res.text)   
+             
+	# write resultatet to 2 dataframes
+    # first dataframe with text
+	df = ds.write('dataframe')
+    # next dataframe with codes
+	df_id = ds.write('dataframe', naming='id')
+    # returner also ds if one need metadata
+	return df, df_id, ds
+
+  
+
+df, df_id, ds = apiToDataframe(postUrl2013, apiQuery)
+
+df
+
+df_id
+
+
+ds
+
+#Amend extracted data to only include currently needed information for tables
+averageIncomeOnly = df[df['Data'].str.contains("Average")]
+toDatabase = averageIncomeOnly[["Postal code area", "value"]]
+
+#loading data into sqlite database
+try:
+    
+    
+    sqliteConnection = sqlite3.connect('statisticsFinland.db')
+    con = sqliteConnection.cursor()
+    print("Database created and Successfully Connected to SQLite")
+
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2013 (post_code_area  VARCHAR(255), value INT);'''
+    con.execute(table_create)
+    sqliteConnection.commit()
+    print("SQLite table created")
+
+    toDatabase.to_sql('averageIncome2013', sqliteConnection, if_exists='append', index=False)
+
+
+except sqlite3.Error as error:
+    print("Error while connecting to sqlite", error)
+finally:
+    if sqliteConnection:
+        sqliteConnection.close()
+        print("The SQLite connection is closed")
