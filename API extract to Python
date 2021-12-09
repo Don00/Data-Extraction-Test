@@ -54,7 +54,7 @@ ds
 #Amend extracted data to only include currently needed information for tables
 averageIncomeOnly = df[df['Information'].str.contains("Average")]
 toDatabase = averageIncomeOnly[["Postal code area", "value"]]
-toDatabase.rename(columns={'Postal code area': 'post_code_area'}, inplace=True)
+toDatabase.rename(columns={'Postal code area': 'post_code_area', 'value' : 'value_2019'}, inplace=True)
 toDatabase['post_code'] = toDatabase['post_code_area'].str[:5]
 toDatabase = toDatabase[toDatabase.post_code != "WHOLE"]
 #loading data into sqlite database
@@ -66,7 +66,7 @@ try:
     con = sqliteConnection.cursor()
     print("Database created and Successfully Connected to SQLite")
 
-    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2019 (post_code_area  VARCHAR(255), value INT, post_code INT);'''
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2019 (post_code_area  VARCHAR(255), value_2019 INT, post_code INT);'''
     con.execute(table_create)
     sqliteConnection.commit()
     print("SQLite table created")
@@ -131,7 +131,7 @@ ds
 #Amend extracted data to only include currently needed information for tables
 averageIncomeOnly = df[df['Information'].str.contains("Average")]
 toDatabase = averageIncomeOnly[["Postal code area", "value"]]
-toDatabase.rename(columns={'Postal code area': 'post_code_area'}, inplace=True)
+toDatabase.rename(columns={'Postal code area': 'post_code_area', 'value' : 'value_2017'}, inplace=True)
 toDatabase['post_code'] = toDatabase['post_code_area'].str[:5]
 toDatabase = toDatabase[toDatabase.post_code != "WHOLE"]
 #loading data into sqlite database
@@ -142,7 +142,7 @@ try:
     con = sqliteConnection.cursor()
     print("Database created and Successfully Connected to SQLite")
 
-    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2017 (post_code_area  VARCHAR(255), value INT, post_code INT);'''
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2017 (post_code_area  VARCHAR(255), value_2017 INT, post_code INT);'''
     con.execute(table_create)
     sqliteConnection.commit()
     print("SQLite table created")
@@ -214,7 +214,7 @@ ds
 #Amend extracted data to only include currently needed information for tables
 averageIncomeOnly = df[df['Data'].str.contains("Average")]
 toDatabase = averageIncomeOnly[["Postal code area", "value"]]
-toDatabase.rename(columns={'Postal code area': 'post_code_area'}, inplace=True)
+toDatabase.rename(columns={'Postal code area': 'post_code_area', 'value' : 'value_2016'}, inplace=True)
 toDatabase['post_code'] = toDatabase['post_code_area'].str[:5]
 toDatabase = toDatabase[toDatabase.post_code != "Finla"]
 #loading data into sqlite database
@@ -225,7 +225,7 @@ try:
     con = sqliteConnection.cursor()
     print("Database created and Successfully Connected to SQLite")
 
-    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2016 (post_code_area  VARCHAR(255), value INT, post_code INT);'''
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2016 (post_code_area  VARCHAR(255), value_2016 INT, post_code INT);'''
     con.execute(table_create)
     sqliteConnection.commit()
     print("SQLite table created")
@@ -293,7 +293,7 @@ ds
 #Amend extracted data to only include currently needed information for tables
 averageIncomeOnly = df[df['Data'].str.contains("Average")]
 toDatabase = averageIncomeOnly[["Postal code area", "value"]]
-toDatabase.rename(columns={'Postal code area': 'post_code_area'}, inplace=True)
+toDatabase.rename(columns={'Postal code area': 'post_code_area', 'value' : 'value_2015'}, inplace=True)
 toDatabase['post_code'] = toDatabase['post_code_area'].str[:5]
 toDatabase = toDatabase[toDatabase.post_code != "Finla"]
 #loading data into sqlite database
@@ -304,7 +304,7 @@ try:
     con = sqliteConnection.cursor()
     print("Database created and Successfully Connected to SQLite")
 
-    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2015 (post_code_area  VARCHAR(255), value INT, post_code INT);'''
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2015 (post_code_area  VARCHAR(255), value_2015 INT, post_code INT);'''
     con.execute(table_create)
     sqliteConnection.commit()
     print("SQLite table created")
@@ -373,7 +373,7 @@ ds
 #Amend extracted data to only include currently needed information for tables
 averageIncomeOnly = df[df['Data'].str.contains("Average")]
 toDatabase = averageIncomeOnly[["Postal code area", "value"]]
-toDatabase.rename(columns={'Postal code area': 'post_code_area'}, inplace=True)
+toDatabase.rename(columns={'Postal code area': 'post_code_area', 'value' : 'value_2014'}, inplace=True)
 toDatabase['post_code'] = toDatabase['post_code_area'].str[:5]
 toDatabase = toDatabase[toDatabase.post_code != "Finla"]
 #loading data into sqlite database
@@ -384,7 +384,7 @@ try:
     con = sqliteConnection.cursor()
     print("Database created and Successfully Connected to SQLite")
 
-    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2014 (post_code_area  VARCHAR(255), value INT, post_code INT);'''
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2014 (post_code_area  VARCHAR(255), value_2014 INT, post_code INT);'''
     con.execute(table_create)
     sqliteConnection.commit()
     print("SQLite table created")
@@ -454,7 +454,7 @@ ds
 #Amend extracted data to only include currently needed information for tables
 averageIncomeOnly = df[df['Data'].str.contains("Average")]
 toDatabase = averageIncomeOnly[["Postal code area", "value"]]
-toDatabase.rename(columns={'Postal code area': 'post_code_area'}, inplace=True)
+toDatabase.rename(columns={'Postal code area': 'post_code_area', 'value' : 'value_2013'}, inplace=True)
 toDatabase['post_code'] = toDatabase['post_code_area'].str[:5]
 toDatabase = toDatabase[toDatabase.post_code != "Finla"]
 #loading data into sqlite database
@@ -465,7 +465,7 @@ try:
     con = sqliteConnection.cursor()
     print("Database created and Successfully Connected to SQLite")
 
-    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2013 (post_code_area  VARCHAR(255), value INT, post_code INT);'''
+    table_create = '''CREATE TABLE IF NOT EXISTS averageIncome2013 (post_code_area  VARCHAR(255), value_2013 INT, post_code INT);'''
     con.execute(table_create)
     sqliteConnection.commit()
     print("SQLite table created")
@@ -479,3 +479,4 @@ finally:
     if sqliteConnection:
         sqliteConnection.close()
         print("The SQLite connection is closed")
+
