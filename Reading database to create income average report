@@ -1,0 +1,20 @@
+import sqlite3
+import pandas as pd
+
+
+    
+sqliteConnection = sqlite3.connect('statisticsFinland.db')
+data2019 = pd.read_sql_query("SELECT * from averageIncome2019", sqliteConnection)
+data2017 = pd.read_sql_query("SELECT * from averageIncome2017", sqliteConnection)
+data2016 = pd.read_sql_query("SELECT * from averageIncome2016", sqliteConnection)
+data2015 = pd.read_sql_query("SELECT * from averageIncome2015", sqliteConnection)
+data2014 = pd.read_sql_query("SELECT * from averageIncome2014", sqliteConnection)
+data2013 = pd.read_sql_query("SELECT * from averageIncome2013", sqliteConnection)
+
+df = pd.concat([data2019['post_code_area'], data2019['post_code'],data2019['value_2019'], data2017['value_2017'], data2016['value_2016'],data2015['value_2015'], data2014['value_2014'], data2013['value_2013']], axis=1, join='inner')
+df.reset_index(drop=True, inplace=True)
+#df = pd.DataFrame(result)
+
+
+test= df[df['post_code'].isin({100, 2380, 16710, 41930, 54800})]
+print(test.to_string(index=False))
